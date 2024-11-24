@@ -12,9 +12,33 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.get('/:id', async (req, res) => {
+    try {
+        return res.status(200).json(await service.getProductById(req.params.id))
+    } catch (error) {
+        return res.status(500).json({erro: error.message})
+    }
+})
+
 router.post('/criar', async (req, res) => {
     try {
         return res.status(201).json(await service.createProduct(req.body))
+    } catch (error) {
+        return res.status(500).json({erro: error.message})
+    }
+})
+
+router.put('/:id', async (req, res) => {
+    try {
+        return res.status(200).json(await service.updateProduct(req.body, req.params.id))
+    } catch (error) {
+        return res.status(500).json({erro: error.message})
+    }
+})
+
+router.delete('/:id', async (req, res) => {
+    try {
+        return res.status(200).json(await service.deleteProduct(req.params.id))
     } catch (error) {
         return res.status(500).json({erro: error.message})
     }

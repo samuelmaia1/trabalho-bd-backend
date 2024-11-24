@@ -36,7 +36,7 @@ router.post('/criar', async (req,res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const deletedUser = await service.deleteUser(req.params.id)
-        return res.status(204).json({ok: true, message: 'Usuário deletado com sucesso', data: deletedUser})
+        return res.status(200).json({ok: true, message: 'Usuário deletado com sucesso', data: deletedUser})
     } catch (error) {
         return res.status(500).json({erro: 'Erro ao excluir conta. Por favor, tente novamente mais tarde.'})
     }
