@@ -21,6 +21,15 @@ router.get('/:id', async (req, res) => {
     }
 })
 
+router.get('/:id/pedidos', async (req, res) => {
+    try {
+        return res.status(200).json(await service.getUserOrders(req.params.id))
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).json({erro: 'Erro interno ao processar usuário. Por favor, tente novamente mais tarde.'})
+    }
+})
+
 router.post('/criar', async (req,res) => {
     try {
         return res.status(201).json(await service.createUser(req.body)) 

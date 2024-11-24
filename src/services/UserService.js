@@ -54,4 +54,82 @@ export class UserService{
 
         return res.rows[0]
     }
+
+    async getUserOrders(id){
+        const selectQuery = `
+            SELECT 
+            p.id AS pedido_id,
+            p.valor_produtos,
+            p.valor_frete,
+            p.valor_total,
+            p.data,
+            p.endereco_entrega,
+            p.status,
+            u.id AS usuario_id,
+            u.nome AS usuario_nome,
+            u.email AS usuario_email,
+            p.id_forma_pagamento,  -- Forma de pagamento está na tabela pedido
+            pr.id AS produto_id,
+            pr.descricao AS produto_descricao,
+            pp.quantidade AS produto_quantidade,
+            pp.valor AS produto_valor
+            FROM pedido p
+            JOIN usuario u ON p.id_usuario = u.id
+            JOIN pedido_produtos pp ON p.id = pp.id_pedido
+            JOIN produto pr ON pp.id_produto = pr.id
+            WHERE u.id = $1;
+        `
+
+        const {rows} = await query(selectQuery, [id])
+
+        if (rows.length === 0)
+            throw new Error('Produto não encontrado')
+
+        console.log(rows[0])
+
+        let pedidos = [];
+    let currentOrderId = null;
+    let currentOrder = null;
+
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+
+        if (currentOrderId !== row.pedido_id) {
+            if (currentOrder) {
+                pedidos.push(currentOrder);
+            }
+
+            currentOrder = {
+                id: row.pedido_id,
+                user: {
+                    id: row.usuario_id,
+                    name: row.usuario_nome,
+                    email: row.usuario_email,
+                },
+                productsValue: row.valor_produtos,
+                deliveryValue: row.valor_frete,
+                totalValue: row.valor_total,
+                date: row.data,
+                paymentMode: row.id_forma_pagamento,
+                deliveryAddress: row.endereco_entrega,
+                status: row.status,
+                products: [],
+            };
+
+            currentOrderId = row.pedido_id;
+        }
+            currentOrder.products.push({
+                id: row.produto_id,
+                descricao: row.produto_descricao,
+                quantidade: row.produto_quantidade,
+                valor: row.produto_valor,
+            });
+        }
+
+        if (currentOrder) {
+            pedidos.push(currentOrder);
+        }
+
+        return pedidos;
+    }
 }

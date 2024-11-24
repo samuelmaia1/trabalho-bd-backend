@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import userController from './routes/User.js'
 import productController from './routes/Product.js'
+import orderController from './routes/Order.js'
 
 dotenv.config()
 
@@ -18,6 +19,7 @@ app.use(express.json())
 
 app.use('/usuarios', userController)
 app.use('/produtos', productController)
+app.use('/pedidos', orderController)
 
 app.get('/', async (req, res) => {
     
