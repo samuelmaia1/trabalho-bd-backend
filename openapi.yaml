@@ -1,0 +1,813 @@
+openapi: 3.0.3
+info:
+  title: API de Gestão de Pedidos, Produtos, Usuários, Tipos de Produtos e Pagamentos
+  description: Documentação para a API de gerenciamento de pedidos, produtos, tipos de produtos, pagamentos e usuários.
+  version: 1.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/56PLEASEDONT/DB-Trabalho/1.0.0
+  - url: http://localhost:3000
+    description: Servidor local
+tags:
+  - name: Produtos
+    description: Operações relacionadas a produtos
+  - name: Tipos de Produto
+    description: Gerenciamento de tipos de produtos
+  - name: Pedidos
+    description: Gerenciamento de pedidos e itens
+  - name: Pagamentos
+    description: Operações relacionadas a pagamentos
+  - name: Usuario
+    description: Gerenciamento de Usuario
+
+paths:
+
+
+  /usuarios:
+    get:
+      tags:
+        - Usuario
+      summary: Retorna todos os usuários
+      responses:
+        200:
+          description: Lista de usuários
+          content:
+            application/json:
+              examples:
+                sucesso:
+                  value:
+                    - id: 1
+                      nome: "João Silva"
+                      email: "joao@example.com"
+                    - id: 2
+                      nome: "Maria Oliveira"
+                      email: "maria@example.com"
+        500:
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                erro: "Erro interno ao processar usuários. Por favor, tente novamente mais tarde."
+
+  /usuarios/{id}:
+    get:
+      tags:
+        - Usuario
+      summary: Retorna um usuário pelo ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Detalhes do usuário
+          content:
+            application/json:
+              examples:
+                sucesso:
+                  value:
+                    id: 1
+                    nome: "João Silva"
+                    email: "joao@example.com"
+        500:
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                erro: "Erro interno ao processar usuário. Por favor, tente novamente mais tarde."
+
+    delete:
+      tags:
+        - Usuario
+      summary: Deleta um usuário pelo ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Usuário deletado com sucesso
+          content:
+            application/json:
+              example:
+                ok: true
+                message: "Usuário deletado com sucesso"
+        500:
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                erro: "Erro ao excluir conta. Por favor, tente novamente mais tarde."
+
+    put:
+      tags:
+        - Usuario
+      summary: Atualiza informações de um usuário
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                  example: "João Atualizado"
+                email:
+                  type: string
+                  example: "joao.atualizado@example.com"
+      responses:
+        200:
+          description: Usuário atualizado com sucesso
+          content:
+            application/json:
+              example:
+                id: 1
+                nome: "João Atualizado"
+                email: "joao.atualizado@example.com"
+        500:
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                erro: "Erro interno. Por favor, tente novamente mais tarde."
+
+  /usuarios/{id}/pedidos:
+    get:
+      tags:
+        - Usuario
+      summary: Retorna os pedidos de um usuário pelo ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Lista de pedidos do usuário
+          content:
+            application/json:
+              examples:
+                sucesso:
+                  value:
+                    - id: 101
+                      descricao: "Pedido de livros"
+                      valor: 150.00
+                    - id: 102
+                      descricao: "Pedido de eletrônicos"
+                      valor: 500.00
+        500:
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                erro: "Erro interno ao processar pedidos. Por favor, tente novamente mais tarde."
+
+  /usuarios/criar:
+    post:
+      tags:
+        - Usuario
+      summary: Cria um novo usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                  example: "João Silva"
+                email:
+                  type: string
+                  example: "joao@example.com"
+                senha:
+                  type: string
+                  example: "senha123"
+      responses:
+        201:
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              example:
+                id: 1
+                nome: "João Silva"
+                email: "joao@example.com"
+        400:
+          description: Requisição inválida
+          content:
+            application/json:
+              example:
+                erro: "Preencha todos os campos"
+        500:
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                erro: "Erro interno. Por favor, tente novamente mais tarde."
+
+
+
+  /produtos:
+  
+    get:
+      tags:
+      - Produtos
+      summary: Listar todos os produtos
+      responses:
+        '200':
+          description: Lista de produtos retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Produto'
+        '500':
+          description: Erro interno
+    post:
+      tags:
+      - Produtos
+      summary: Criar um novo produto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProdutoCriacao'
+      responses:
+        '201':
+          description: Produto criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+        '500':
+          description: Erro interno
+
+  /produtos/{id}:
+    get:
+      tags:
+      - Produtos
+      summary: Obter um produto por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Produto retornado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+        '404':
+          description: Produto não encontrado
+        '500':
+          description: Erro interno
+    put:
+      tags:
+      - Produtos    
+      summary: Atualizar um produto por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProdutoAtualizacao'
+      responses:
+        '200':
+          description: Produto atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Produto'
+        '404':
+          description: Produto não encontrado
+        '500':
+          description: Erro interno
+    delete:
+      tags:
+      - Produtos
+      summary: Deletar um produto por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Produto deletado com sucesso
+        '404':
+          description: Produto não encontrado
+        '500':
+          description: Erro interno
+
+  /tipos-produto:
+    get:
+      tags:
+      - Tipos de Produto
+
+      summary: Listar todos os tipos de produtos
+      responses:
+        '200':
+          description: Lista de tipos de produtos retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TipoProduto'
+        '500':
+          description: Erro interno
+    post:
+      tags:
+      - Tipos de Produto
+      summary: Criar um novo tipo de produto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TipoProdutoCriacao'
+      responses:
+        '201':
+          description: Tipo de produto criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TipoProduto'
+        '400':
+          description: Campo "descricao" é obrigatório
+        '500':
+          description: Erro interno
+
+  /tipos-produto/{id}:
+    get:
+      tags:
+      - Tipos de Produto
+      summary: Obter tipo de produto por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tipo de produto retornado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TipoProduto'
+        '404':
+          description: Tipo de produto não encontrado
+        '500':
+          description: Erro interno
+    delete:
+      tags:
+      - Tipos de Produto
+      summary: Deletar um tipo de produto por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tipo de produto deletado com sucesso
+        '404':
+          description: Tipo de produto não encontrado
+        '500':
+          description: Erro interno
+
+  /pedidos:
+    get:
+      tags:
+      - Pedidos
+      summary: Listar todos os pedidos
+      responses:
+        '200':
+          description: Lista de pedidos retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pedido'
+        '500':
+          description: Erro interno ao obter pedidos
+    post:
+      tags:
+      - Pedidos
+      summary: Criar um novo pedido
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PedidoCriacao'
+      responses:
+        '201':
+          description: Pedido criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pedido'
+        '500':
+          description: Erro interno ao criar pedido
+
+  /pedidos/{id}:
+    get:
+      tags:
+      - Pedidos
+      summary: Obter um pedido por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pedido retornado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pedido'
+        '404':
+          description: Pedido não encontrado
+        '500':
+          description: Erro interno ao obter pedido
+    delete:
+      tags:
+      - Pedidos
+      summary: Deletar um pedido por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pedido deletado com sucesso
+        '404':
+          description: Pedido não encontrado
+        '500':
+          description: Erro interno ao deletar pedido
+    put:
+      tags:
+      - Pedidos
+
+      summary: Atualizar um pedido por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                  $ref: '#/components/schemas/Produto' # Corrigido
+      responses:
+        '200':
+          description: Pedido atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pedido'
+        '404':
+          description: Pedido não encontrado
+        '500':
+          description: Erro interno ao atualizar pedido
+
+  /pedidos/{id}/itens:
+    post:
+      tags:
+      - Pedidos
+      summary: Adicionar um item ao pedido
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                  $ref: '#/components/schemas/Produto' # Corrigido
+      responses:
+        '201':
+          description: Item adicionado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProdutoCriacao' # Corrigido
+        '500':
+          description: Erro interno ao adicionar item ao pedido
+
+  /pedidos/{id}/itens/{id_produto}:
+    delete:
+      tags:
+      - Pedidos
+      summary: Remover um item do pedido
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id_produto
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item removido com sucesso
+        '404':
+          description: Pedido ou item não encontrado
+        '500':
+          description: Erro interno ao remover item do pedido
+
+  /pedidos/{id}/status:
+    put:
+      tags:
+      - Pedidos
+      summary: Atualizar status de um pedido
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "Em andamento"
+      responses:
+        '200':
+          description: Status atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pedido'
+        '404':
+          description: Pedido não encontrado
+        '500':
+          description: Erro interno ao atualizar status do pedido
+
+  /pedidos/{id}/calcular-frete:
+    post:
+      tags:
+      - Pedidos
+      summary: Calcular o frete de um pedido
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cep:
+                  type: string
+                  example: "12345-678"
+      responses:
+        '200':
+          description: Frete calculado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pedido'
+        '404':
+          description: Pedido não encontrado
+        '500':
+          description: Erro interno ao calcular frete
+          
+  /pagamentos:
+    get:
+      tags:
+      - Pagamentos
+      summary: Listar todos os pagamentos
+      responses:
+        '200':
+          description: Lista de pagamentos retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pagamento'
+        '500':
+          description: Erro interno ao listar pagamentos
+    post:
+      tags:
+      - Pagamentos
+      summary: Criar um novo pagamento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PagamentoCriacao'
+      responses:
+        '201':
+          description: Pagamento criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pagamento'
+        '400':
+          description: O campo "descricao" é obrigatório
+        '500':
+          description: Erro interno ao criar pagamento
+
+  /pagamentos/{id}:
+    delete:
+      tags:
+      - Pagamentos
+      summary: Deletar um pagamento por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pagamento deletado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pagamento'
+        '404':
+          description: Pagamento não encontrado
+        '500':
+          description: Erro interno ao deletar pagamento
+
+
+components:
+  schemas:
+    Pagamento:
+      type: object
+      properties:
+        id:
+          type: string
+        descricao:
+          type: string
+      required:
+        - id
+        - descricao
+    PagamentoCriacao:
+      type: object
+      properties:
+        descricao:
+          type: string
+      required:
+        - descricao
+    Produto:
+      type: object
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        preco:
+          type: number
+        estoque:
+          type: integer
+        tipoProdutoId:
+          type: string
+      required:
+        - id
+        - nome
+        - preco
+        - estoque
+    ProdutoCriacao:
+      type: object
+      properties:
+        nome:
+          type: string
+        preco:
+          type: number
+        estoque:
+          type: integer
+        tipoProdutoId:
+          type: string
+      required:
+        - nome
+        - preco
+        - estoque
+    ProdutoAtualizacao:
+      type: object
+      properties:
+        nome:
+          type: string
+        preco:
+          type: number
+        estoque:
+          type: integer
+        tipoProdutoId:
+          type: string
+    TipoProduto:
+      type: object
+      properties:
+        id:
+          type: string
+        descricao:
+          type: string
+      required:
+        - id
+        - descricao
+    TipoProdutoCriacao:
+      type: object
+      properties:
+        descricao:
+          type: string
+      required:
+        - descricao
+    Pedido:
+      type: object
+      properties:
+        id:
+          type: string
+        endereco_entrega:
+          type: string
+        id_forma_pagamento:
+          type: string
+        status:
+          type: string
+        itens:
+          type: array
+          items:
+            type: object
+            properties:
+              id_produto:
+                type: string
+              quantidade:
+                type: integer
+      required:
+        - id
+        - endereco_entrega
+        - id_forma_pagamento
+        - status
+    PedidoCriacao:
+      type: object
+      properties:
+        endereco_entrega:
+          type: string
+        id_forma_pagamento:
+          type: string
+        itens:
+          type: array
+          items:
+            type: object
+            properties:
+              id_produto:
+                type: string
+              quantidade:
+                type: integer
