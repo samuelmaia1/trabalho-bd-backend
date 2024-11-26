@@ -1,11 +1,18 @@
 meta {
   name: editar pedido
   type: http
-  seq: 5
+  seq: 4
 }
 
 put {
-  url: 
-  body: none
+  url: {{Local}}/pedidos/{{ped-id}}
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "endereco_entrega": "Rua top, da via lega, do lugar mais o menos",
+    "id_forma_pagamento": "b1ddff5c-10e9-4dab-8344-4ccb7cbb8c84"
+  }
 }

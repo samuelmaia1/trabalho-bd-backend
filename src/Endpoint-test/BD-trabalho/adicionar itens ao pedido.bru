@@ -6,6 +6,14 @@ meta {
 
 post {
   url: {{Local}}/pedidos/{{ped-id}}/itens
-  body: none
+  body: json
   auth: none
+}
+
+body:json {
+  {
+      "productId": "7e7b1261-e9ad-41cc-8bd4-ddc77d1a3f34",
+      "quantity": 19
+  }
+  
 }

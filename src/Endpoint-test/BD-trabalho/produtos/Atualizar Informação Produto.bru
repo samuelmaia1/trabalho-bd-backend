@@ -5,7 +5,16 @@ meta {
 }
 
 put {
-  url: 
-  body: none
+  url: {{Local}}/produtos/{{produto-id}}
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "descricao": "Salmão",
+    "valor_unitario": 20,
+    "peso": 2.45,
+    "tipo": "6c7c9cc2-6d88-4e07-b1db-0566cf3ca175"
+  }
 }

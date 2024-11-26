@@ -5,7 +5,13 @@ meta {
 }
 
 post {
-  url: 
-  body: none
+  url: {{Local}}/pagamentos
+  body: json
   auth: none
+}
+
+body:json {
+  {
+    "descricao": "debito"
+  }
 }
