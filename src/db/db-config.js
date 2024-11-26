@@ -6,12 +6,12 @@ dotenv.config()
 const {Pool} = pkg
 
 const pool = new Pool({
-    host: process.env.DB_HOST,
-    password: process.env.DB_PASS,
-    user: process.env.DB_USER,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME
-})
+    user: 'postgres', 
+    host: 'localhost', 
+    database: 'mydb',
+    password: 'postgres', 
+    port: 5432, 
+});
 
 const query = async (queryString, params) => {
     const client = await pool.connect()

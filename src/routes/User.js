@@ -4,6 +4,7 @@ import { UserService } from '../services/UserService.js'
 const router = express.Router()
 const service = new UserService()
 
+/**retorna todos os usuarios */
 router.get('/', async (req, res) => {
     try {
         return res.status(200).json(await service.getAllUsers())
@@ -12,6 +13,8 @@ router.get('/', async (req, res) => {
     }
 })
 
+
+/**retorna um usuario atraves do id */
 router.get('/:id', async (req, res) => {
     try {
         return res.status(200).json(await service.getUserById(req.params.id))
@@ -21,6 +24,7 @@ router.get('/:id', async (req, res) => {
     }
 })
 
+/**retorna as ordens de 1 usuario */
 router.get('/:id/pedidos', async (req, res) => {
     try {
         return res.status(200).json(await service.getUserOrders(req.params.id))
@@ -30,18 +34,21 @@ router.get('/:id/pedidos', async (req, res) => {
     }
 })
 
-router.post('/criar', async (req,res) => {
+/**cria usuario */
+router.post('/criar', async (req, res) => {
     try {
-        return res.status(201).json(await service.createUser(req.body)) 
+        return res.status(201).json(await service.createUser(req.body));
     } catch (error) {
-        console.log(error.message)
-        if (error.message.includes('viola a restrição de não-nulo'))
-            return res.status(400).json({erro: 'Preencha todos os campos'})
-        return res.status(500).json({erro: 'Erro interno. Por favor, tente novamente mais tarde.'})
+        console.error('Error Details:', error); // Log the full error object
+        if (error.message.includes('viola a restrição de não-nulo')) {
+            return res.status(400).json({ erro: 'Preencha todos os campos' });
+        }
+        return res.status(500).json({ erro: 'Erro interno. Por favor, tente novamente mais tarde.' });
     }
-    
-})
+});
 
+
+/**deleta usuario */
 router.delete('/:id', async (req, res) => {
     try {
         const deletedUser = await service.deleteUser(req.params.id)
@@ -51,6 +58,7 @@ router.delete('/:id', async (req, res) => {
     }
 })
 
+/**atualiza informacoes do usuario */
 router.put('/:id', async (req, res) => {
     try {
         return res.status(200).json(await service.updateUser(req.body, req.params.id))

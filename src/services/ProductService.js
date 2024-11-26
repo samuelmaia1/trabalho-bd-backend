@@ -19,6 +19,13 @@ export class ProductService{
         return res.rows
     }
 
+
+    async getProductsByType(typeId) {
+        const queryString = 'SELECT * FROM produto WHERE tipo = $1;';
+        const res = await query(queryString, [typeId]);
+        return res.rows;
+    }
+
     async updateProduct(data, id){
         const keys = Object.keys(data)
         const values = Object.values(data)

@@ -1,0 +1,23 @@
+meta {
+  name: Criar Usuario
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{Local}}/usuarios/criar
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "nome": "João Silva",
+    "senha": "senha",
+    "email": "joao@gmail.com",
+    "rua": "rua",
+    "bairro": "lugar",
+    "cidade": "em outro lugar"
+  }
+  
+}

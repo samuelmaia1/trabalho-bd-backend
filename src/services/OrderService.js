@@ -2,6 +2,8 @@ import query from "../db/db-config.js"
 import { randomUUID } from 'node:crypto'
 
 export class OrderService{
+
+    /**cria um pedido */
     async createOrder(data){
         const {deliveryValue, paymentMode, deliveryAddress, status, products, userId} = data
 
@@ -25,6 +27,7 @@ export class OrderService{
 
         for (const product of products){
             await query(
+
                 `INSERT INTO pedido_produtos (id_pedido, id_produto, quantidade, valor)
                 VALUES ($1, $2, $3, $4)`,
                 [orderId, product.id, product.quantity, product.value * product.quantity]
@@ -34,59 +37,238 @@ export class OrderService{
         return this.getOrderById(orderId)
     }
 
-    async getOrderById(id){
-        const selectQuery = `
-            SELECT 
-            p.id AS pedido_id,
-            p.valor_produtos,
-            p.valor_frete,
-            p.valor_total,
-            p.data,
-            p.endereco_entrega,
-            p.status,
-            u.id AS usuario_id,
-            u.nome AS usuario_nome,
-            u.email AS usuario_email,
-            fp.descricao AS forma_pagamento,
-            pr.id AS produto_id,
-            pr.descricao AS produto_descricao,
-            pp.quantidade AS produto_quantidade,
-            pp.valor AS produto_valor
-            FROM pedido p
-            JOIN usuario u ON p.id_usuario = u.id
-            JOIN forma_pagamento fp ON p.id_forma_pagamento = fp.id
-            JOIN pedido_produtos pp ON p.id = pp.id_pedido
-            JOIN produto pr ON pp.id_produto = pr.id
-            WHERE p.id = $1;
-        `
 
-        const {rows} = await query(selectQuery, [id])
+    /**deleta um pedido juntamente com os itens */
+    async deleteOrder(id) {
+        await query(
+            `DELETE FROM pedido_produtos WHERE id_pedido = $1`,
+            [id]
+        );
 
-        if (rows.length === 0)
-            throw new Error('Produto não encontrado')
+        const orderResult = await query(
+            `DELETE FROM pedido WHERE id = $1 RETURNING *`,
+            [id]
+        );
 
-        const order = {
-            id: rows[0].pedido_id,
-            user: {
-                id: rows[0].usuario_id,
-                name: rows[0].usuario_nome,
-                email: rows[0].usuario_email,
-            },
-            productsValue: rows[0].valor_produtoa,
-            deliveryValue: rows[0].valor_frete,
-            totalValue: rows[0].valor_total,
-            date: rows[0].data,
-            paymentMode: rows[0].forma_pagamento,
-            deliveryAddress: rows[0].endereco_entrega,
-            status: rows[0].status,
-            products: rows.map((row) => ({
-                id: row.produto_id,
-                descricao: row.produto_descricao,
-                quantidade: row.produto_quantidade,
-                valor: row.produto_valor,
-            })),
+        return orderResult.rows[0] || null;
+    }
+
+    /**Atualiza o endereco de entrega, e forma de pagamento */
+    async updateOrder(orderId, newAddress, Pagamento) {
+        const queryString = `
+            UPDATE pedido
+            SET endereco_entrega = $1, id_forma_pagamento = $2
+            WHERE id = $3
+            RETURNING *;
+        `;
+
+        const result = await query(queryString, [newAddress, Pagamento, orderId]);
+
+        return result.rows[0] || null;
+    }
+
+
+    async Adicionaritem(orderId, item) {
+        const { productId, quantity, unitValue } = item;
+
+        const orderExists = await query(`SELECT id FROM pedido WHERE id = $1`, [orderId]);
+        if (orderExists.rowCount === 0) {
+            return null; // Pedido não encontrado
         }
 
-        return order
+        const queryString = `
+            INSERT INTO pedido_produtos (id_pedido, id_produto, quantidade, valor)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *;
+        `;
+        const result = await query(queryString, [orderId, productId, quantity, unitValue * quantity]);
+
+        // Atualiza o valor total do pedido
+        await query(
+            `
+            UPDATE pedido
+            SET valor_produtos = valor_produtos + $1, valor_total = valor_total + $1
+            WHERE id = $2
+            `,
+            [unitValue * quantity, orderId]
+        );
+
+        return result.rows[0];
     }
+
+
+    /**Deleta um item de um pedido */
+async deleteItem(orderId, productId) {
+
+    const itemRes = await query(
+        `SELECT quantidade, valor FROM pedido_produtos WHERE id_pedido = $1 AND id_produto = $2`,
+        [orderId, productId]
+    );
+
+    if (itemRes.rowCount === 0) {
+        return null; 
+    }
+
+    const { quantidade, valor } = itemRes.rows[0];
+
+    await query(
+        `DELETE FROM pedido_produtos WHERE id_pedido = $1 AND id_produto = $2`,
+        [orderId, productId]
+    );
+
+    await query(
+        `
+        UPDATE pedido
+        SET 
+            valor_produtos = valor_produtos - $1,
+            valor_total = valor_total - $1
+        WHERE id = $2
+        `,
+        [valor, orderId]
+    );
+
+    return this.getOrderById(orderId);
+}
+
+
+
+
+/** Obtém todos os pedidos */
+async getAllOrders() {
+    const ordersRes = await query(
+        `SELECT id, id_usuario, valor_produtos, valor_frete, valor_total, data, id_forma_pagamento, endereco_entrega, status
+        FROM pedido`
+    );
+
+    if (ordersRes.rowCount === 0) {
+        return []; 
+    }
+
+    const orders = ordersRes.rows;
+
+    for (const order of orders) {
+        const productsRes = await query(
+            `SELECT id_produto AS productId, quantidade, valor
+            FROM pedido_produtos
+            WHERE id_pedido = $1`,
+            [order.id]
+        );
+
+        order.products = productsRes.rows;
+    }
+
+    return orders;
+}
+
+
+/** Obtém um pedido pelo ID, incluindo produtos (usado para facilitar certos processos) */
+async getOrderById(orderId) {
+    const orderRes = await query(
+        `SELECT id, id_usuario, valor_produtos, valor_frete, valor_total, data, id_forma_pagamento, endereco_entrega, status
+        FROM pedido
+        WHERE id = $1`,
+        [orderId]
+    );
+
+    if (orderRes.rowCount === 0) {
+        return null; // Pedido não encontrado
+    }
+
+    const order = orderRes.rows[0];
+
+    const productsRes = await query(
+        `SELECT id_produto AS productId, quantidade, valor
+        FROM pedido_produtos
+        WHERE id_pedido = $1`,
+        [orderId]
+    );
+
+    order.products = productsRes.rows;
+
+    return order;
+}
+
+
+
+/** Obtém todos os pedidos de um usuário */
+async getOrdersByUserId(userId) {
+    const ordersRes = await query(
+        `SELECT id, id_usuario, valor_produtos, valor_frete, valor_total, data, id_forma_pagamento, endereco_entrega, status
+        FROM pedido
+        WHERE id_usuario = $1`,
+        [userId]
+    );
+
+    if (ordersRes.rowCount === 0) {
+        return []; 
+    }
+
+    const orders = ordersRes.rows;
+
+    for (const order of orders) {
+        const productsRes = await query(
+            `SELECT id_produto AS productId, quantidade, valor
+            FROM pedido_produtos
+            WHERE id_pedido = $1`,
+            [order.id]
+        );
+
+        order.products = productsRes.rows;
+    }
+
+    return orders;
+}
+
+
+
+
+/** Atualiza o status de um pedido */
+async updateOrderStatus(orderId, newStatus) {
+    const queryString = `
+        UPDATE pedido
+        SET status = $1
+        WHERE id = $2
+        RETURNING *;
+    `;
+
+    const result = await query(queryString, [newStatus, orderId]);
+
+    if (result.rowCount === 0) {
+        return null; // Pedido não encontrado
+    }
+
+    return result.rows[0];
+}
+
+
+/** Calcula e atualiza o valor do frete de um pedido */
+async calculateShipping(orderId, shippingDetails) {
+    const orderRes = await query(
+        `SELECT id, valor_produtos FROM pedido WHERE id = $1`,
+        [orderId]
+    );
+
+    if (orderRes.rowCount === 0) {
+        return null; 
+    }
+
+    const order = orderRes.rows[0];
+    const { valor_produtos: productValue } = order;
+
+    const shippingCost = productValue > 100 ? 0 : 15; 
+
+    await query(
+        `
+        UPDATE pedido
+        SET valor_frete = $1, valor_total = valor_produtos + $1
+        WHERE id = $2
+        `,
+        [shippingCost, orderId]
+    );
+
+    return this.getOrderById(orderId);
+}
+
+
+
 }
