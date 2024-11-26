@@ -4,38 +4,46 @@ import { randomUUID } from 'node:crypto'
 export class OrderService{
 
     /**cria um pedido */
-    async createOrder(data){
-        const {deliveryValue, paymentMode, deliveryAddress, status, products, userId} = data
-
+    async createOrder(data) {
+        const { paymentMode, userId, status } = data;
+    
+        const userRes = await query(
+            `SELECT rua, bairro, cidade FROM usuario WHERE id = $1`,
+            [userId]
+        );
+    
+        if (userRes.rows.length === 0) {
+            throw new Error('User not found');
+        }
+    
+        const { rua, bairro, cidade } = userRes.rows[0];
+    
+        const productValue = 0;
+    
+        const deliveryValue = 5;
+    
         const orderRes = await query(
-            `INSERT INTO pedido (id_usuario, valor_produtos, valor_frete, valor_total, data, id_forma_pagamento, endereco_entrega, status, id)
+            `INSERT INTO pedido (id_usuario, valor_produtoa, valor_frete, valor_total, data, id_forma_pagamento, endereco_entrega, status, id)
             VALUES ($1, $2, $3, $4, CURRENT_DATE, $5, $6, $7, $8)
             RETURNING id`,
             [
                 userId,
-                products.reduce((acc, p) => acc + p.value * p.quantity, 0),
+                productValue,  
                 deliveryValue,
-                products.reduce((acc, p) => acc + p.value * p.quantity, 0) + deliveryValue,
+                productValue + deliveryValue,  
                 paymentMode,
-                deliveryAddress,
+                `${rua}, ${bairro}, ${cidade}`, 
                 status,
-                randomUUID()
+                randomUUID() 
             ]
-        )
-
-        const orderId = orderRes.rows[0].id
-
-        for (const product of products){
-            await query(
-
-                `INSERT INTO pedido_produtos (id_pedido, id_produto, quantidade, valor)
-                VALUES ($1, $2, $3, $4)`,
-                [orderId, product.id, product.quantity, product.value * product.quantity]
-            )
-        } 
-
-        return this.getOrderById(orderId)
+        );
+    
+        const orderId = orderRes.rows[0].id;
+    
+        return this.getOrderById(orderId);
     }
+    
+    
 
 
     /**deleta um pedido juntamente com os itens */
@@ -69,32 +77,43 @@ export class OrderService{
 
 
     async Adicionaritem(orderId, item) {
-        const { productId, quantity, unitValue } = item;
-
+        const { productId, quantity } = item;
+    
+        // Check if the order exists
         const orderExists = await query(`SELECT id FROM pedido WHERE id = $1`, [orderId]);
         if (orderExists.rowCount === 0) {
             return null; // Pedido não encontrado
         }
-
+    
+        // Fetch the product's unit value (valor_unitario)
+        const productQuery = await query(`SELECT valor_unitario FROM produto WHERE id = $1`, [productId]);
+        if (productQuery.rowCount === 0) {
+            return null; // Produto não encontrado
+        }
+    
+        const unitValue = productQuery.rows[0].valor_unitario;
+    
+        // Insert the product into the order
         const queryString = `
             INSERT INTO pedido_produtos (id_pedido, id_produto, quantidade, valor)
             VALUES ($1, $2, $3, $4)
             RETURNING *;
         `;
         const result = await query(queryString, [orderId, productId, quantity, unitValue * quantity]);
-
-        // Atualiza o valor total do pedido
+    
+        // Update the order's total values
         await query(
             `
             UPDATE pedido
-            SET valor_produtos = valor_produtos + $1, valor_total = valor_total + $1
+            SET valor_produtoa = valor_produtoa + $1, valor_total = valor_total + $1
             WHERE id = $2
             `,
             [unitValue * quantity, orderId]
         );
-
+    
         return result.rows[0];
     }
+    
 
 
     /**Deleta um item de um pedido */
@@ -120,7 +139,7 @@ async deleteItem(orderId, productId) {
         `
         UPDATE pedido
         SET 
-            valor_produtos = valor_produtos - $1,
+            valor_produtoa = valor_produtoa - $1,
             valor_total = valor_total - $1
         WHERE id = $2
         `,
@@ -136,7 +155,7 @@ async deleteItem(orderId, productId) {
 /** Obtém todos os pedidos */
 async getAllOrders() {
     const ordersRes = await query(
-        `SELECT id, id_usuario, valor_produtos, valor_frete, valor_total, data, id_forma_pagamento, endereco_entrega, status
+        `SELECT id, id_usuario, valor_produtoa, valor_frete, valor_total, data, id_forma_pagamento, endereco_entrega, status
         FROM pedido`
     );
 
@@ -164,7 +183,7 @@ async getAllOrders() {
 /** Obtém um pedido pelo ID, incluindo produtos (usado para facilitar certos processos) */
 async getOrderById(orderId) {
     const orderRes = await query(
-        `SELECT id, id_usuario, valor_produtos, valor_frete, valor_total, data, id_forma_pagamento, endereco_entrega, status
+        `SELECT id, id_usuario, valor_produtoa, valor_frete, valor_total, data, id_forma_pagamento, endereco_entrega, status
         FROM pedido
         WHERE id = $1`,
         [orderId]
@@ -193,7 +212,7 @@ async getOrderById(orderId) {
 /** Obtém todos os pedidos de um usuário */
 async getOrdersByUserId(userId) {
     const ordersRes = await query(
-        `SELECT id, id_usuario, valor_produtos, valor_frete, valor_total, data, id_forma_pagamento, endereco_entrega, status
+        `SELECT id, id_usuario, valor_produtoa, valor_frete, valor_total, data, id_forma_pagamento, endereco_entrega, status
         FROM pedido
         WHERE id_usuario = $1`,
         [userId]
@@ -244,7 +263,7 @@ async updateOrderStatus(orderId, newStatus) {
 /** Calcula e atualiza o valor do frete de um pedido */
 async calculateShipping(orderId, shippingDetails) {
     const orderRes = await query(
-        `SELECT id, valor_produtos FROM pedido WHERE id = $1`,
+        `SELECT id, valor_produtoa FROM pedido WHERE id = $1`,
         [orderId]
     );
 
@@ -260,7 +279,7 @@ async calculateShipping(orderId, shippingDetails) {
     await query(
         `
         UPDATE pedido
-        SET valor_frete = $1, valor_total = valor_produtos + $1
+        SET valor_frete = $1, valor_total = valor_produtoa + $1
         WHERE id = $2
         `,
         [shippingCost, orderId]

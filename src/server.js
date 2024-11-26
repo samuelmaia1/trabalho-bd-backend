@@ -5,6 +5,7 @@ import userController from './routes/User.js'
 import productController from './routes/Product.js'
 import orderController from './routes/Order.js'
 import typeController from './routes/Type.js'
+import paymentController from './routes/Pagamanto.js'
 
 dotenv.config()
 
@@ -23,7 +24,8 @@ app.use(express.json())
 app.use('/usuarios', userController)
 app.use('/produtos', productController)
 app.use('/pedidos', orderController)
-app.use('/tipos-produtos', typeController)
+app.use('/tipos-produto', typeController)
+app.use('/pagamentos', paymentController)
 
 app.get('/', (req, res) => res.send('ALOU!!!'));
 

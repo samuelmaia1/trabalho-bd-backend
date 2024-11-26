@@ -6,7 +6,7 @@ const router = express.Router();
 const service = new TiposProdutos();
 
 // Criar tipo de produto
-router.post('/tipos-produto', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const { descricao } = req.body;
         if (!descricao) {
@@ -21,7 +21,7 @@ router.post('/tipos-produto', async (req, res) => {
 });
 
 // Deletar tipo de produto
-router.delete('/tipos-produto/:descricao', async (req, res) => {
+router.delete('/:descricao', async (req, res) => {
     try {
         const { descricao } = req.params;
         const tipo = await service.deletarTipo(descricao);
@@ -36,7 +36,7 @@ router.delete('/tipos-produto/:descricao', async (req, res) => {
 });
 
 // Listar tipos de produto
-router.get('/tipos-produto', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const tipos = await service.getTodosTipos();
         return res.status(200).json(tipos);
@@ -47,7 +47,7 @@ router.get('/tipos-produto', async (req, res) => {
 });
 
 // Obter tipo de produto por ID
-router.get('/tipos-produto/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const tipo = await service.getProdutoID(id);
@@ -58,6 +58,21 @@ router.get('/tipos-produto/:id', async (req, res) => {
     } catch (error) {
         console.error(error.message);
         return res.status(500).json({ error: 'Erro interno ao buscar tipo de produto.' });
+    }
+});
+
+/**Pegar produtos daquele tipo*/
+router.get('/produtos/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const product = await service.getProductsByType(id);
+        if (!product) {
+            return res.status(404).json({ error: 'Produto não encontrado' });
+        }
+        return res.status(200).json(product);
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ error: 'Erro interno ao obter produto.' });
     }
 });
 

@@ -7,7 +7,7 @@ const service = new PagamentoService();
 
 
 // Criar pagamento
-router.post('/pagamentos', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const { descricao } = req.body;
         if (!descricao) {
@@ -22,10 +22,10 @@ router.post('/pagamentos', async (req, res) => {
 });
 
 // Deletar pagamento
-router.delete('/pagamentos/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
     try {
-        const { id } = req.params;
-        const pagamento = await service.deletarPagamento(id);
+        const { descricao } = req.params;
+        const pagamento = await service.deletarPagamento(descricao);
         if (!pagamento) {
             return res.status(404).json({ error: 'Pagamento não encontrado' });
         }
@@ -37,7 +37,7 @@ router.delete('/pagamentos/:id', async (req, res) => {
 });
 
 // Listar todos os pagamentos
-router.get('/pagamentos', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const pagamentos = await service.getTodosPagamentos();
         return res.status(200).json(pagamentos);

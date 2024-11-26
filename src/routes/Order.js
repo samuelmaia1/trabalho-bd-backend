@@ -4,7 +4,7 @@ import { OrderService } from '../services/OrderService.js';
 const router = express.Router();
 const service = new OrderService();
 
-router.post('/pedidos', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         return res.status(201).json(await service.createOrder(req.body));
     } catch (error) {
@@ -13,7 +13,7 @@ router.post('/pedidos', async (req, res) => {
     }
 });
 
-router.delete('/pedidos/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const deletedOrder = await service.deleteOrder(id);
@@ -27,7 +27,7 @@ router.delete('/pedidos/:id', async (req, res) => {
     }
 });
 
-router.get('/pedidos', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         return res.status(200).json(await service.getAllOrders());
     } catch (error) {
@@ -36,7 +36,7 @@ router.get('/pedidos', async (req, res) => {
     }
 });
 
-router.put('/pedidos/:id', async (req, res) => {
+router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { endereco_entrega, id_forma_pagamento } = req.body;
@@ -51,7 +51,7 @@ router.put('/pedidos/:id', async (req, res) => {
     }
 });
 
-router.post('/pedidos/:id/itens', async (req, res) => {
+router.post('/:id/itens', async (req, res) => {
     try {
         const { id } = req.params;
         return res.status(201).json(await service.Adicionaritem(id, req.body));
@@ -61,7 +61,7 @@ router.post('/pedidos/:id/itens', async (req, res) => {
     }
 });
 
-router.delete('/pedidos/:id/itens/:id_produto', async (req, res) => {
+router.delete('/:id/itens/:id_produto', async (req, res) => {
     try {
         const { id, id_produto } = req.params;
         const updatedOrder = await service.deleteItem(id, id_produto);
@@ -75,7 +75,7 @@ router.delete('/pedidos/:id/itens/:id_produto', async (req, res) => {
     }
 });
 
-router.get('/pedidos/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const order = await service.getOrderById(id);
@@ -99,7 +99,7 @@ router.get('/usuarios/:id/pedidos', async (req, res) => {
     }
 });
 
-router.put('/pedidos/:id/status', async (req, res) => {
+router.put('/:id/status', async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
@@ -114,7 +114,7 @@ router.put('/pedidos/:id/status', async (req, res) => {
     }
 });
 
-router.post('/pedidos/:id/calcular-frete', async (req, res) => {
+router.post('/:id/calcular-frete', async (req, res) => {
     try {
         const { id } = req.params;
         const updatedOrder = await service.calculateShipping(id, req.body);

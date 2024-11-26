@@ -1,0 +1,23 @@
+meta {
+  name: Adicionar Produto
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{Local}}/produtos/criar
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "descricao": "bamana",
+    "valor_unitario": 5,
+    "tipo": "4139faf5-2148-41ec-902a-b4783362603c"
+  }
+}
+
+vars:post-response {
+  : 
+}

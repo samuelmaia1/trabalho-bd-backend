@@ -27,7 +27,7 @@ CREATE TABLE produto (
     valor_unitario REAL NOT NULL,
     peso REAL NOT NULL,
     id_tipo TEXT NOT NULL,
-    FOREIGN KEY (id_tipo) REFERENCES tipo_produto(id)
+    FOREIGN KEY (id_tipo) REFERENCES tipo_produto(id) ON DELETE CASCADE
 );
 
 -- Tabela: pedido
@@ -52,6 +52,8 @@ CREATE TABLE pedido_produtos (
     quantidade INTEGER NOT NULL,
     valor REAL NOT NULL,
     PRIMARY KEY (id_pedido, id_produto),
-    FOREIGN KEY (id_pedido) REFERENCES pedido(id),
+    FOREIGN KEY (id_pedido) REFERENCES pedido(id) ON DELETE CASCADE,
     FOREIGN KEY (id_produto) REFERENCES produto(id)
 );
+
+

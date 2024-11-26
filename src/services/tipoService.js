@@ -30,6 +30,11 @@ export class TiposProdutos {
         return res.rows[0] || null;
     }
     
+    async getProductsByType(typeId) {
+        const queryString = 'SELECT * FROM produto WHERE id_tipo = $1;';
+        const res = await query(queryString, [typeId]);
+        return res.rows;
+    }
 
 
 }
