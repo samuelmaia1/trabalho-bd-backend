@@ -1,6 +1,6 @@
 import pkg from 'pg'
 import dotenv from 'dotenv'
-
+import express from 'express'
 dotenv.config()
 
 const {Pool} = pkg
@@ -27,5 +27,10 @@ const query = async (queryString, params) => {
         client.release()
     }
 }
+
+const app = express();
+
+
+
 
 export default query

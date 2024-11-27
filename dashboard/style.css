@@ -1,0 +1,41 @@
+.navbar {
+    color: white !important;
+    background-color: rgb(23, 23, 24) !important;
+    border-radius: 50px;
+    margin-bottom: 6cap;
+}
+
+.nav-link{
+    color: white !important;
+    font-size: 20px !important;
+}
+
+.active{
+    color: rgb(235, 152, 44) !important;
+}
+
+.list-group-item{
+    font-size: 20px;
+}
+
+.btn {
+    margin: 5px;
+    margin-bottom: 5px;
+}
+
+.card {
+    background-color: rgb(219, 219, 211);
+    color:rgb(12, 11, 11);
+    display: inline-block;
+    margin: 15px;
+}
+
+.card .btn {
+    background-color: black;
+}
+
+#produtos-list{
+    display: inline-block;
+    justify-content: start; 
+    gap: 20px; 
+}

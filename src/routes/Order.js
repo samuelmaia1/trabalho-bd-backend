@@ -36,6 +36,17 @@ router.get('/', async (req, res) => {
     }
 });
 
+
+router.get('/usuario/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        return res.status(200).json(await service.getOrdersByUserId(id));
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ error: 'Erro interno ao obter pedidos.' });
+    }
+});
+
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;

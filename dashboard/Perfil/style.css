@@ -1,0 +1,33 @@
+body {
+    display: flex;
+    justify-content: start; 
+    gap: 20px; 
+}
+
+.profile-container {
+    background-color: rgb(238, 240, 218);
+    padding: 40px;
+    border-radius: 20px;
+    font-size: 18px;
+    width: 25%;
+}
+
+.pedidos {
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 18px;
+    width: 100%;
+
+}
+
+
+.card {
+    background-color: rgb(219, 219, 211);
+    color:rgb(12, 11, 11);
+    display: inline-block;
+    margin: 15px;
+}
+
+.card .btn {
+    background-color: black;
+}

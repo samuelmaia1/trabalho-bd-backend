@@ -1,3 +1,4 @@
+-- Table: usuario
 CREATE TABLE usuario (
     id TEXT PRIMARY KEY,
     nome TEXT NOT NULL,
@@ -8,19 +9,19 @@ CREATE TABLE usuario (
     cidade TEXT NOT NULL
 );
 
--- Tabela: forma_pagamento
+-- Table: forma_pagamento
 CREATE TABLE forma_pagamento (
     id TEXT PRIMARY KEY,
     descricao TEXT NOT NULL UNIQUE
 );
 
--- Tabela: tipo_produto
+-- Table: tipo_produto
 CREATE TABLE tipo_produto (
     id TEXT PRIMARY KEY,
     descricao TEXT NOT NULL UNIQUE
 );
 
--- Tabela: produto
+-- Table: produto
 CREATE TABLE produto (
     id TEXT PRIMARY KEY,
     descricao TEXT NOT NULL,
@@ -30,7 +31,7 @@ CREATE TABLE produto (
     FOREIGN KEY (id_tipo) REFERENCES tipo_produto(id) ON DELETE CASCADE
 );
 
--- Tabela: pedido
+-- Table: pedido
 CREATE TABLE pedido (
     id TEXT PRIMARY KEY,
     id_usuario TEXT NOT NULL,
@@ -45,7 +46,7 @@ CREATE TABLE pedido (
     FOREIGN KEY (id_forma_pagamento) REFERENCES forma_pagamento(id)
 );
 
--- Tabela: pedido_produtos
+-- Table: pedido_produtos
 CREATE TABLE pedido_produtos (
     id_pedido TEXT NOT NULL,
     id_produto TEXT NOT NULL,
@@ -56,4 +57,59 @@ CREATE TABLE pedido_produtos (
     FOREIGN KEY (id_produto) REFERENCES produto(id)
 );
 
+-- Table: change_log
+CREATE TABLE change_log (
+    id SERIAL PRIMARY KEY,
+    table_name TEXT NOT NULL,
+    operation TEXT NOT NULL,
+    changed_data JSONB,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
+-- Function: log_changes
+CREATE OR REPLACE FUNCTION log_changes()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO change_log (table_name, operation, changed_data)
+    VALUES (
+        TG_TABLE_NAME,
+        TG_OP,
+        CASE
+            WHEN TG_OP = 'DELETE' THEN row_to_json(OLD)
+            ELSE row_to_json(NEW)
+        END
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Triggers for all tables
+CREATE TRIGGER after_change_usuario
+AFTER INSERT OR UPDATE OR DELETE ON usuario
+FOR EACH ROW
+EXECUTE FUNCTION log_changes();
+
+CREATE TRIGGER after_change_forma_pagamento
+AFTER INSERT OR UPDATE OR DELETE ON forma_pagamento
+FOR EACH ROW
+EXECUTE FUNCTION log_changes();
+
+CREATE TRIGGER after_change_tipo_produto
+AFTER INSERT OR UPDATE OR DELETE ON tipo_produto
+FOR EACH ROW
+EXECUTE FUNCTION log_changes();
+
+CREATE TRIGGER after_change_produto
+AFTER INSERT OR UPDATE OR DELETE ON produto
+FOR EACH ROW
+EXECUTE FUNCTION log_changes();
+
+CREATE TRIGGER after_change_pedido
+AFTER INSERT OR UPDATE OR DELETE ON pedido
+FOR EACH ROW
+EXECUTE FUNCTION log_changes();
+
+CREATE TRIGGER after_change_pedido_produtos
+AFTER INSERT OR UPDATE OR DELETE ON pedido_produtos
+FOR EACH ROW
+EXECUTE FUNCTION log_changes();
