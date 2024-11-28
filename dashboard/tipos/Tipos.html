@@ -5,10 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./../style.css">
 
-    <title>Dashboard</title>
+    <title>Tipos</title>
 </head>
+
+<style>
+    li:hover {
+        background-color: rgb(231, 188, 131);
+       cursor: pointer;
+
+    }
+</style>
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid flex-column align-items-center">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,20 +24,25 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav d-flex justify-content-center w-100">
-                <a class="nav-link active" aria-current="page" href="./index.html">INICIO</a>
-                <a class="nav-link" href="./Perfil/usuarios.html">USUÁRIOS</a>
-                <a class="nav-link" href="./produtos/produtos.html">PRODUTOS</a>
-                <a class="nav-link  " href="./tipos/Tipos.html" aria-disabled="true">TIPOS</a>
-                <a class="nav-link " href="./pagamentos/pagamentos.html" aria-disabled="true">PAGAMENTOS</a>
+                <a class="nav-link" aria-current="page" href="./../index.html">INICIO</a>
+                <a class="nav-link" href="./../Perfil/usuarios.html">USUÁRIOS</a>
+                <a class="nav-link " href="./../produtos/produtos.html">PRODUTOS</a>
+                <a class="nav-link active disabled" href="./../tipos/Tipos.html"aria-disabled="true">TIPOS</a>
+                <a class="nav-link " href="./../pagamentos/pagamentos.html" aria-disabled="true">PAGAMENTOS</a>
 
             </div>
         </div>
     </div>
 </nav>
-<body style="margin: 100px;">
-    <h1 >Mudanças recentes</h1>
-    <ul id="change-list"></ul>
+<body style="margin: 100px; display: block;">
+    <a href="#" class="btn btn-primary">Adicionar Automaticamente +</a>
+<div style="display: block;"></div>
+<div style="display: flex;"></div>
 
+    <ul class="list-group" id="produtos-list"></ul>
+
+      
+      
 
     <script src="index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

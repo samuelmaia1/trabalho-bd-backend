@@ -3,6 +3,8 @@ const params = new URLSearchParams(window.location.search);
 const userId = params.get('id'); 
 console.log('User ID:', userId);
 
+
+
 fetch(`${local}usuarios/${userId}`) 
   .then((response) => {
     if (!response.ok) {
@@ -18,7 +20,7 @@ fetch(`${local}usuarios/${userId}`)
       <p><span><strong>Rua:</strong></span> ${data.rua}</p>
       <p><span><strong>Bairro:</strong></span> ${data.bairro}</p>
       <p><span><strong>Cidade:</strong></span> ${data.cidade}</p>
-    <a href="#" class="btn btn-primary">Editar</a>
+
 
     `;
   })
@@ -63,3 +65,77 @@ fetch(`${local}usuarios/${userId}`)
     const pedidosContainer = document.querySelector('.pedidos');
     pedidosContainer.innerHTML = `<p>Erro ao carregar os pedidos.</p>`;
   });
+
+
+  async function fetchUsuarios() {
+    try {
+        const response = await fetch(`${local}usuarios`);
+        console.log('Fetch response:', response); 
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const usuarios = await response.json();
+        console.log('Usuarios:', usuarios); 
+        const list = document.getElementById('usuarios-list');
+        if (usuarios.length === 0) {
+            list.innerHTML = '<li>Usuarios não encontrados.</li>';
+            return;
+        }
+
+        list.innerHTML = usuarios.map(usuario => `
+            <li class="list-group-item">
+                <a href="./perfil.html?id=${usuario.id}">${usuario.nome} - ${usuario.email}</a>
+            </li>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error ao pegar usuarios:', error);
+        const list = document.getElementById('usuarios-list');
+        list.innerHTML = '<li>Error ao pegar users. </li>';
+    }
+}
+
+
+
+document.getElementById('createUser').addEventListener('click', async () => {
+
+  const randomName = `User${Math.floor(Math.random() * 10000)}`;
+  const randomEmail = `user${Math.floor(Math.random() * 10000)}@gmail.com`;
+
+  const userData = {
+      nome: randomName,
+      senha: 'senha123', 
+      email: randomEmail,
+      rua: 'Rua Aleatória',
+      bairro: 'Bairro Qualquer',
+      cidade: 'Cidade Genérica'
+  };
+
+  try {
+      const response = await fetch(`${local}usuarios/criar`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(userData)
+      });
+
+      if (response.ok) {
+          const data = await response.json();
+          alert('Usuário criado com sucesso: ' + JSON.stringify(data));
+          location.reload();
+
+      } else {
+          const error = await response.json();
+          alert('Erro ao criar usuário: ' + JSON.stringify(error));
+      }
+  } catch (error) {
+      console.error('Erro na requisição:', error);
+      alert('Erro interno. Verifique o console para mais detalhes.');
+  }
+});
+
+
+fetchUsuarios();

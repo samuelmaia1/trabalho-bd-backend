@@ -13,10 +13,24 @@
 <body style="margin: 100px;">
     <div class="profile-container" id="profile">
         <h1>Carregando...</h1>
+
     </div>
+
     <div style="width: 100%;">
+        <a href="#" class="btn btn-primary " id = "deletar-user">Deletar Usuario</a>
+
         <h1>Pedidos</h1>
-        <a href="#" class="btn btn-primary">Adicionar +</a>
+
+        <div id="pedidoForm">
+            <label for="tipoSelect">Escolha o método de pagamento:</label>
+            <select id="tipoSelect" class="form-control">
+              <option selected>Carregando métodos de pagamento...</option>
+            </select>
+            <br />
+            <button id="criarPedido" class="btn btn-primary">Criar Pedido</button>
+          </div>
+          
+        
 
         <div class="pedidos">
         <p>Detalhes dos pedidos podem ir aqui...</p>
@@ -25,5 +39,100 @@
     
 
     <script src="perfil.js"></script>
+    <script>
+        document.getElementById('deletar-user').addEventListener('click', async (e) => {
+  e.preventDefault(); 
+  const confirmar = confirm('Tem certeza de que deseja deletar este usuário?');
+  if (!confirmar) return;
+
+  try {
+      const response = await fetch(`${local}usuarios/${userId}`, {
+          method: 'DELETE',
+      });
+
+      if (response.ok) {
+          alert('Usuário deletado com sucesso!');
+          window.location.href = './usuarios.html'; 
+      } else {
+          const error = await response.json();
+          alert(`Erro ao deletar usuário: ${error.message || 'Erro desconhecido'}`);
+      }
+  } catch (error) {
+      console.error('Erro ao deletar usuário:', error);
+      alert('Erro interno. Verifique o console para mais detalhes.');
+  }
+});
+
+
+
+async function carregarMetodosPagamento() {
+  const selectElement = document.getElementById("tipoSelect");
+  try {
+      const response = await fetch(`${local}pagamentos`);
+      if (!response.ok) throw new Error("Erro ao buscar métodos de pagamento.");
+
+      const metodos = await response.json();
+      selectElement.innerHTML = '<option selected>Selecione um método de pagamento</option>';
+      metodos.forEach((metodo) => {
+          selectElement.innerHTML += `<option value="${metodo.id}">${metodo.descricao}</option>`;
+      });
+  } catch (error) {
+      console.error("Erro ao carregar métodos de pagamento:", error);
+      selectElement.innerHTML =
+          '<option disabled>Erro ao carregar métodos de pagamento</option>';
+  }
+}
+
+document.getElementById("criarPedido").addEventListener("click", async () => {
+  const selectElement = document.getElementById("tipoSelect");
+  const metodoPagamento = selectElement.value;
+
+  if (!metodoPagamento || metodoPagamento === "Selecione um método de pagamento") {
+      alert("Por favor, selecione um método de pagamento válido.");
+      return;
+  }
+
+  const pedidoData = {
+      userId: userId,
+      paymentMode: metodoPagamento,
+      status: "Pending",
+  };
+
+  try {
+      const response = await fetch(`${local}pedidos`, {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify(pedidoData),
+      });
+
+      if (response.ok) {
+          const pedidoCriado = await response.json();
+          alert(`Pedido criado com sucesso!\n\nDetalhes do Pedido:\n
+              ID: ${pedidoCriado.id}\n
+              ID do Usuário: ${pedidoCriado.id_usuario}\n
+              Valor Produto: R$${pedidoCriado.valor_produtoa.toFixed(2)}\n
+              Valor Frete: R$${pedidoCriado.valor_frete.toFixed(2)}\n
+              Valor Total: R$${pedidoCriado.valor_total.toFixed(2)}\n
+              Data: ${new Date(pedidoCriado.data).toLocaleDateString()}\n
+              Forma de Pagamento: ${pedidoCriado.id_forma_pagamento}\n
+              Status: ${pedidoCriado.status}`);
+              
+              window.location.reload();
+            } else {
+          const error = await response.json();
+          alert(`Erro ao criar pedido: ${error.message || "Erro desconhecido"}`);
+      }
+  } catch (error) {
+      console.error("Erro ao criar pedido:", error);
+      alert("Erro interno. Verifique o console para mais detalhes.");
+  }
+});
+
+carregarMetodosPagamento();
+
+
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>

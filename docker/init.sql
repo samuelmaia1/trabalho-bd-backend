@@ -113,3 +113,11 @@ CREATE TRIGGER after_change_pedido_produtos
 AFTER INSERT OR UPDATE OR DELETE ON pedido_produtos
 FOR EACH ROW
 EXECUTE FUNCTION log_changes();
+
+
+INSERT INTO forma_pagamento (id, descricao) VALUES
+('1', 'Cartão de Crédito'),
+('2', 'Cartão de Débito'),
+('3', 'Boleto Bancário'),
+('4', 'Pix'),
+('5', 'Transferência Bancária');

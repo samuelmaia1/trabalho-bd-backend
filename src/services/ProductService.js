@@ -31,13 +31,27 @@ export class ProductService{
     
     
 
-    async getAllProducts(){
-        const queryString = 'SELECT * FROM produto;'
-
-        const res = await query(queryString)
-
-        return res.rows
+    async getAllProducts() {
+        const queryString = `
+            SELECT 
+                produto.id,
+                produto.descricao,
+                produto.valor_unitario,
+                produto.peso,
+                tipo_produto.descricao AS tipo_descricao
+            FROM 
+                produto
+            INNER JOIN 
+                tipo_produto
+            ON 
+                produto.id_tipo = tipo_produto.id;
+        `;
+    
+        const res = await query(queryString);
+    
+        return res.rows;
     }
+    
 
 
 

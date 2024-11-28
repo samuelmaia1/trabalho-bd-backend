@@ -25,4 +25,11 @@ export class PagamentoService {
         return res.rows
     }
 
+
+    async GetPagamentoID(){
+        const queryString = 'DELETE FROM forma_pagamento WHERE id = $1 RETURNING *';
+        const res = await query(queryString)
+        return res.rows[0];
+     }
+
 }

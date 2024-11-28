@@ -11,7 +11,7 @@ export class TiposProdutos {
 
 
     async deletarTipo(descricao) {
-        const queryString = 'DELETE FROM tipo_produto WHERE descricao = $1 RETURNING *';
+        const queryString = 'DELETE FROM tipo_produto WHERE id = $1 RETURNING *';
         const res = await query(queryString, [descricao]);
         return res.rows[0] || null;
     }

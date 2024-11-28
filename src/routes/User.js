@@ -39,7 +39,7 @@ router.post('/criar', async (req, res) => {
     try {
         return res.status(201).json(await service.createUser(req.body));
     } catch (error) {
-        console.error('Error Details:', error); // Log the full error object
+        console.error('Error Details:', error); 
         if (error.message.includes('viola a restrição de não-nulo')) {
             return res.status(400).json({ erro: 'Preencha todos os campos' });
         }
